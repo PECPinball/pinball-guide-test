@@ -481,25 +481,24 @@
             Aucun projet
         </div>
 
-       <div id="header">
-
-			<button id="backButton">
-				←
+       <div>
+			<button id="openProjectButton">
+				📂
 			</button>
 
-			<div id="tableTitle">
-				Aucun projet
-			</div>
 
-			<div>
+		   <input
+			type="file"
+			id="projectFileInput"
+			accept=".zip,application/zip"
+			style="display:none;">
+			   
+			   
+			<button id="homeButton">
+				⌂
+			</button>
 
-				<button id="homeButton">
-					⌂
-				</button>
-
-			</div>
-
-</div>
+		</div>
 
     </div>
 
@@ -1544,7 +1543,45 @@
 			}
 			});
 
-			
+			document.getElementById("openProjectButton")
+			.addEventListener("click", () =>
+			{
+			document
+			.getElementById("projectFileInput")
+			.click();
+			});
+
+			document
+			.getElementById("projectFileInput")
+			.addEventListener("change", async event =>
+			{
+				const file = event.target.files[0];
+
+				if (!file)
+					return;
+
+				console.log("ZIP sélectionné :", file.name);
+
+				try
+				{
+					const zip =
+						await JSZip.loadAsync(file);
+
+					console.log(
+						"Fichiers contenus :",
+						Object.keys(zip.files)
+					);
+
+					await LoadProjectZip(zip);
+				}
+				catch (error)
+				{
+					console.error(
+						"Impossible de charger le projet :",
+						error
+					);
+				}
+			});
 								
 			async function LoadProjectZip(zip)
 			{

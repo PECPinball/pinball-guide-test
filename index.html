@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Pinball Guide Test</title>
+</head>
+
+<body>
+
+<h1>Test Pinball Guide</h1>
+
+<p id="status">Chargement du ZIP...</p>
+
+<script>
+
+const zipUrl =
+    "https://github.com/PECPinball/pinball-guide-test/raw/refs/heads/main/The%20Addams%20Family.zip";
+
+fetch(zipUrl)
+    .then(response =>
+    {
+        if (!response.ok)
+            throw new Error("HTTP " + response.status);
+
+        return response.blob();
+    })
+    .then(blob =>
+    {
+        document.getElementById("status").textContent =
+            "✅ ZIP chargé avec succès — " +
+            blob.size +
+            " octets";
+    })
+    .catch(error =>
+    {
+        console.error(error);
+
+        document.getElementById("status").textContent =
+            "❌ Impossible de charger le ZIP";
+    });
+
+</script>
+
+</body>
+</html>

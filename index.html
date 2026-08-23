@@ -1,45 +1,1822 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <title>Pinball Guide Test</title>
+    <meta charset="utf-8">
+	<link rel="manifest" href="manifest.json">
+	<meta name="viewport"
+      content="width=device-width, initial-scale=1">
+    <title>Pinball Mind Map</title>
+
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+    <style>
+		html,
+		body {
+		margin: 0;
+		width: 100%;
+		height: 100%;
+		font-family: Arial, sans-serif;
+		}
+
+		#header
+		{
+		height: 50px;
+
+		display: flex;
+
+		align-items: center;
+
+		justify-content: space-between;
+
+		padding: 0 20px;
+
+		background: #222;
+
+		color: white;
+
+		box-sizing: border-box;
+		}
+
+		#tableTitle
+		{
+		font-size: 24px;
+
+		font-weight: bold;
+		}
+
+		#header button
+		{
+		height: 40px;
+
+		min-width: 40px;
+
+		font-size: 20px;
+		}
+
+		#container {
+
+		display: flex;
+
+		width: 100%;
+
+		height: calc(100% - 60px);
+		}
+
+		#playfield {
+
+		width: 40%;
+
+		position: relative;
+
+		overflow: hidden;
+
+		background: #222;
+		}
+		.stepMarker {
+
+		position: absolute;
+
+		width: 32px;
+		height: 32px;
+
+		border-radius: 50%;
+
+		background: #ffcc00;
+
+		color: black;
+
+		font-weight: bold;
+
+		display: flex;
+
+		align-items: center;
+
+		justify-content: center;
+
+		transform: translate(-50%, -50%);
+		}
+		.stepItemInfo {
+
+		padding: 8px;
+
+		margin-bottom: 6px;
+
+		background: #eef5ff;
+
+		border-left: 4px solid #4da3ff;
+
+		color: #333;
+		}
+		.playfieldItem
+		{
+		padding:8px;
+
+		margin-bottom:6px;
+
+		background:white;
+
+		border-left:4px solid #607d8b;
+
+		transition:border-color .15s;
+		}
+		.playfieldItem:hover
+		{
+		border-left-color:#ffcc00;
+		}
+
+		.playfieldLabel
+		{
+		color:#607d8b;
+		font-weight:bold;
+		}
+
+		.playfieldType
+		{
+		color:#888;
+
+		font-size:0.9em;
+		}
+		.playfieldDescription
+		{
+		display:none;
+
+		margin-top:8px;
+
+		color:#444;
+
+		line-height:1.4;
+
+		padding-top:8px;
+
+		border-top:1px solid #ddd;
+		}
+
+		.playfieldHeader
+		{
+		display:flex;
+
+		justify-content:space-between;
+
+		align-items:center;
+		}
+		.playfieldDescription
+		{
+		display:none;
+
+		margin-top:8px;
+
+		padding-top:8px;
+
+		border-top:1px solid #ddd;
+
+		color:#444;
+
+		line-height:1.4;
+		}
+
+		.playfieldExpand
+		{
+		cursor:pointer;
+
+		font-weight:bold;
+
+		font-size:20px;
+
+		color:#666;
+
+		user-select:none;
+		}
+		.playfieldSectionTitle
+		{
+		display:flex;
+
+		justify-content:space-between;
+
+		align-items:center;
+
+		cursor:pointer;
+
+		background:#ececec;
+
+		padding:8px 10px;
+
+		margin-top:15px;
+
+		font-weight:bold;
+
+		user-select:none;
+		}
+
+		.playfieldSectionContent
+		{
+		display:block;
+		}
+
+		.playfieldArrow
+		{
+		font-size:18px;
+		}
+		.stepMarkerInfo.stepMarkerHighlight
+		{
+		background: rgba(77, 163, 255, 0.65);
+		border: 2px solid #4da3ff;
+		}
+		.stepGoal
+		{
+		}
+
+		.stepShoots
+		{
+		color: #150;
+		margin-top: 6px;
+
+		font-size: 0.9em;
+
+		font-weight: bold;
+
+		opacity: 0.8;
+
+		margin-top: 6px;
+		padding-left: 17px;
+		}
+		.shootLocation
+		{
+		color: #999;
+		font-weight: normal;
+		}
+		.shootMarker
+		{
+		color: #999;
+		font-weight: normal;
+		}
+
+		.shootTarget
+		{
+		font-weight: bold;
+		color: #222;
+		}
+
+		.shootSeparator
+		{
+		color: #777;
+		font-weight: normal;
+		}
+
+		#stepsContainer {
+
+		position: absolute;
+
+		left: 0;
+		top: 0;
+
+		width: 100%;
+		height: 100%;
+
+		pointer-events: none;
+		}
+
+		#playfieldImage {
+
+		width: 100%;
+		height: 100%;
+
+		object-fit: contain;
+
+		display: block;
+		}
+
+
+		#marker {
+		position: absolute;
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background: red;
+		transform: translate(-50%, -50%);
+		display: none;
+		}
+
+		#cy {
+
+		width: 35%;
+
+		border-right: 1px solid #ccc;
+		}
+
+		#info {
+		width: 25%;
+		padding: 20px;
+		box-sizing: border-box;
+		background: #f5f5f5;
+		overflow-y: auto;
+		}
+
+		#title {
+		font-size: 24px;
+		font-weight: bold;
+		margin-bottom: 15px;
+		}
+
+		#description {
+		white-space: pre-line;
+		line-height: 1.5;
+		}
+
+		#stepsList {
+
+		margin-top: 10px;
+		}
+		.stepItem {
+
+		padding: 8px;
+
+		margin-bottom: 6px;
+
+		background: white;
+
+		border-left: 4px solid #ffcc00;
+		}
+		.stepMarkerHighlight {
+
+		transform:
+		translate(-50%, -50%)
+		scale(1.5);
+
+		background: rgba(255, 204, 0, 0.65);
+
+		border: 2px solid #ffcc00;
+
+		transition: all 0.15s;
+		}
+		#descriptionSection,
+		#rewardSection,
+		#sourcesSection,
+		#auteurSection,
+		#contributeursSection
+		{
+		margin-top: 0;
+		margin-bottom: 30px;
+		}
+		#rewardSection h4,
+		#sourcesSection h4,
+		#auteurSection h4,
+		#contributeursSection h4,
+		#stepsTitle
+		{
+		margin: 0 0 10px 0;
+		}
+		#titleContainer
+		{
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		}
+		#advancedButton
+		{
+		width: 32px;
+		height: 32px;
+
+		font-size: 20px;
+		font-weight: bold;
+
+		display: none;
+		}
+		.focusSection
+		{
+		border:1px solid #ccc;
+		margin-bottom:8px;
+		border-radius:4px;
+		overflow:hidden;
+		}
+
+		.focusHeader
+		{
+		background:#ececec;
+		padding:10px;
+		font-weight:bold;
+		cursor:pointer;
+		}
+
+		.focusHeader:hover
+		{
+		background:#dddddd;
+		}
+
+		.focusContent
+		{
+		display:none;
+		background:white;
+		padding:12px;
+		line-height:1.5;
+		}
+
+		.focusContent.open
+		{
+		display:block;
+		}
+		@media (max-width: 900px)
+		{
+		#container
+		{
+		display: grid;
+
+		grid-template-columns: 67% 33%;
+		grid-template-rows: 47vh 47vh;
+
+		height: calc(100vh - 60px);
+		}
+
+		#cy
+		{
+		grid-column: 1 / span 2;
+		grid-row: 1;
+
+		width: auto;
+		height: auto;
+		}
+
+		#playfield
+		{
+		grid-column: 2;
+		grid-row: 2;
+
+		width: auto;
+		height: auto;
+		}
+
+		#info
+		{
+		grid-column: 1;
+		grid-row: 2;
+
+		width: auto;
+		height: auto;
+
+		overflow-y: auto;
+		}
+		.stepMarker
+		{
+		width: 10px;
+		height: 10px;
+
+		font-size: 10px;
+		}
+
+		}
+	</style>
+
 </head>
 
 <body>
 
-<h1>Test Pinball Guide</h1>
+     <div id="header">
 
-<p id="status">Chargement du ZIP...</p>
+        <button id="backButton">
+            ←
+        </button>
 
-<script>
+        <div id="tableTitle">
+            Aucun projet
+        </div>
 
-const zipUrl =
-    "The%20Addams%20Family.zip";
+       <div>
+			//<button id="openProjectButton">
+			//	📂
+			//</button>
 
-fetch(zipUrl)
-    .then(response =>
-    {
-        if (!response.ok)
-            throw new Error("HTTP " + response.status);
 
-        return response.blob();
-    })
-    .then(blob =>
-    {
-        document.getElementById("status").textContent =
-            "✅ ZIP chargé avec succès — " +
-            blob.size +
-            " octets";
-    })
-    .catch(error =>
-    {
-        console.error(error);
+		   <input
+			type="file"
+			id="projectFileInput"
+			accept=".zip,application/zip"
+			style="display:none;">
+			   
+			   
+			<button id="homeButton">
+				⌂
+			</button>
 
-        document.getElementById("status").textContent =
-            "❌ Impossible de charger le ZIP";
-    });
+		</div>
 
-</script>
+    </div>
 
-</body>
+    <div id="container">
+
+        <div id="cy"></div>
+
+        <div id="info">
+
+			<div id="titleContainer">
+
+				<div id="title">
+					Select a node
+				</div>
+
+				<button id="advancedButton">
+					+
+				</button>
+
+			</div>
+
+           <div id="descriptionSection">
+				   <div id="description"></div>
+			</div>
+
+			<div id="focusSectionsContainer"></div>
+
+			<div id="rewardSection">
+				<h4>Récompenses</h4>
+				<div id="reward"></div>
+			</div>
+
+			<div id="stepsContainerInfo"></div>
+
+			<div id="notesSection">
+				<h4>Note</h4>
+				<div id="notesContainer"></div>
+			</div>
+
+			<div id="playfieldSection" style="display:none;">
+
+				<div id="playfieldShots"></div>
+
+				<div id="playfieldInserts"></div>
+
+				<div id="playfieldZones"></div>
+
+			</div>
+
+			<div id="advancedNotesSection" style="display:none;">
+				<h4>Note +</h4>
+				<div id="advancedNotesContainer"></div>
+			</div>
+
+			<div id="auteurSection">
+				<h4>Fiche créée par</h4>
+				<div id="auteur"></div>
+			</div>
+
+			<div id="contributeursSection">
+				<h4>Contributeurs</h4>
+				<div id="contributeurs"></div>
+			</div>
+
+			<div id="sourcesSection">
+				<h4>Sources</h4>
+				<div id="sources"></div>
+			</div>
+
+			
+
+			
+        </div>
+
+       <div id="playfield">
+
+            <img id="playfieldImage"
+                 src="playfield.png"
+                 alt="Playfield">
+
+            <div id="stepsContainer"></div>
+
+        </div>
+
+</div>
+
+    </div>
+
+
+    <script>
+
+		let cy;
+
+		let focusedElements = [];
+		let shootsData = {};
+		let showAdvanced = false;
+
+		let currentNode = null;
+
+
+		cy = cytoscape({
+
+		container: document.getElementById('cy'),
+
+		elements: [],
+
+		autoungrabify: true,
+
+		style: [
+		{
+		selector: 'node',
+		style: {
+
+		'label': 'data(label)',
+
+		'text-valign': 'center',
+		'text-halign': 'center',
+
+		'text-wrap': 'wrap',
+		'text-max-width': 'data(width)',
+
+		'width': 'data(width)',
+		'height': ele => Math.max(1, ele.data('height') - 2),
+
+		'shape': 'round-rectangle',
+
+		'background-color': '#777',
+
+		'color': '#ffffff',
+
+		'font-size': 10
+		}
+		},
+
+		{
+		selector: 'node:active',
+		style: {
+		'overlay-color': '#ffffff',
+		'overlay-padding': 2,
+		'overlay-opacity': 0.2
+		}
+		},
+
+		{
+		selector: 'edge',
+		style: {
+
+		'curve-style': 'bezier',
+
+		'target-arrow-shape': 'triangle',
+
+		'line-color': '#888',
+
+		'target-arrow-color': '#888',
+
+		'z-index': 0
+
+		}
+		},
+
+		{
+		selector: 'node[type="group"]',
+		style: {
+		'shape': 'round-rectangle',
+
+		'background-opacity': 0.05,
+		'background-color': '#0080ff',
+
+		'border-width': 1,
+		'border-color': '#888888',
+
+		'width': 'data(width)',
+		'height': 'data(height)',
+
+		'label': 'data(label)',
+
+		'text-valign': 'top',
+		'text-halign': 'center',
+		'text-margin-y': -3,
+
+		'font-size': 11,
+
+		'color': '#000000',
+
+		'z-index': 10
+		}
+		},
+
+		{
+		selector: 'node[type="subgroup"]',
+		style: {
+		'shape': 'round-rectangle',
+
+		'background-opacity': 0.05,
+		'background-color': '#888888',
+
+		'border-width': 1,
+		'border-color': '#888888',
+
+		'width': 'data(width)',
+		'height': 'data(height)',
+
+		'label': '',
+
+		'z-index': 20
+		}
+		},
+
+		{
+		selector: 'node[type="mode"]',
+		style: {
+		'background-color': 'data(color)',
+
+		'z-index': 30
+		}
+		},
+
+		{
+		selector: 'node[type="playfield"]',
+		style: {
+		'background-color': 'data(color)',
+
+		'z-index': 30
+		}
+		},
+
+		{
+		selector: 'node[type="space"]',
+		style: {
+		'display': 'none'
+		}
+		},
+
+		{
+		selector: 'node[type="route"]',
+		style: {
+		'label': '',
+		'width': 1,
+		'height': 1,
+		'background-opacity': 0,
+		'border-width': 0
+		}
+		}
+
+		],
+
+		layout: {
+		name: 'preset'
+		}
+
+		});
+
+		function ShowStepMarkers(step)
+		{
+		const container =
+		document.getElementById('stepsContainer');
+
+		container.innerHTML = '';
+
+		if (!step.spots)
+		return;
+
+		const img =
+		document.getElementById('playfieldImage');
+
+		const containerRect =
+		img.getBoundingClientRect();
+
+		const imageRatio =
+		img.naturalWidth /
+		img.naturalHeight;
+
+		const containerRatio =
+		containerRect.width /
+		containerRect.height;
+
+		let displayedWidth;
+		let displayedHeight;
+		let offsetX;
+		let offsetY;
+
+		if (imageRatio > containerRatio)
+		{
+		displayedWidth =
+		containerRect.width;
+
+		displayedHeight =
+		displayedWidth /
+		imageRatio;
+
+		offsetX = 0;
+
+		offsetY =
+		(containerRect.height -
+		displayedHeight) / 2;
+		}
+		else
+		{
+		displayedHeight =
+		containerRect.height;
+
+		displayedWidth =
+		displayedHeight *
+		imageRatio;
+
+		offsetY = 0;
+
+		offsetX =
+		(containerRect.width -
+		displayedWidth) / 2;
+		}
+
+		step.spots.forEach(spot =>
+		{
+		const shoot =
+		shootsData[spot.shoot];
+
+		if (!shoot)
+		return;
+
+		const marker =
+		document.createElement('div');
+
+		marker.className =
+		step.type === 'info'
+		? 'stepMarker stepMarkerInfo stepMarkerHighlight'
+		: 'stepMarker stepMarkerHighlight';
+
+		marker.innerText =
+		spot.marker ??
+		spot.id ??
+		"";
+
+		marker.style.left =
+		(offsetX + shoot.x * displayedWidth) + 'px';
+
+		marker.style.top =
+		(offsetY + shoot.y * displayedHeight) + 'px';
+
+		container.appendChild(marker);
+		});
+		}
+
+		function HideStepMarkers()
+		{
+		document.getElementById(
+		'stepsContainer'
+		).innerHTML = '';
+		}
+
+		function HideFocus()
+		{
+		focusedElements.forEach(ele =>
+		{
+		ele.removeStyle();
+		});
+
+		focusedElements = [];
+		}
+
+		function ShowFocus(focusIds)
+		{
+		HideFocus();
+
+		if(!focusIds)
+		return;
+
+		focusIds.forEach(id =>
+		{
+		const ele = cy.getElementById(id);
+
+		if(ele.empty())
+		return;
+
+		ele.style({
+		"border-width": 3,
+		"border-color":"#ff9800",
+		//"background-opacity":0.12,
+		//"background-color":"#ffd54f"
+		});
+
+		focusedElements.push(ele);
+		});
+		}
+
+		function EscapeHtml(text)
+		{
+		if (!text)
+		return '';
+
+		return text
+		.replace(/&/g, "&amp;")
+				.replace(/</g, "&lt;")
+				.replace(/>/g, "&gt;")
+				.replace(/"/g, "&quot;")
+				.replace(/'/g, "&#039;");
+		}
+
+		function BuildShootsHtml(spots)
+		{
+		if (!spots || spots.length === 0)
+		return "";
+
+		let html = "";
+
+		spots.forEach(spot =>
+		{
+		const shot = shootsData[spot.shoot];
+
+		if (!shot)
+		return;
+
+		html += EscapeHtml(shot.label);
+
+		// Marker
+		if (spot.marker)
+		{
+		html +=" <span class='shootMarker'>(" +	EscapeHtml(spot.marker) +")</span>";
+		}
+
+		if (shot.officialName)
+		{
+		html += " <span class='shootLocation'>[" + EscapeHtml(shot.officialName) + "]</span>";
+		}
+
+		html += "<br>";
+		});
+		return html;
+		}
+
+			function FillBulletList(containerId, values)
+			{
+			const container =
+			document.getElementById(containerId);
+
+			container.textContent = '';
+
+			if (!values)
+			return;
+
+			values.forEach(value =>
+			{
+			const line =
+			document.createElement('div');
+
+			line.textContent =
+			'• ' + value;
+
+			container.appendChild(line);
+			});
+			}
+
+			function BuildPlayfieldList(category, containerId)
+			{
+			const container =
+			document.getElementById(containerId);
+
+			container.innerHTML = "";
+
+			const items =
+			Object.values(shootsData)
+			.filter(item => item.category === category);
+
+			if(items.length === 0)
+			return;
+
+			items.sort((a,b)=>
+			a.label.localeCompare(b.label));
+
+			const header =
+			document.createElement("div");
+
+			header.className =
+			"playfieldSectionTitle";
+
+			header.innerHTML =
+			'<span>' +
+			category.charAt(0).toUpperCase() +
+			category.slice(1) +
+			' (' + items.length + ')' +
+			'</span>' +
+			'<span class="playfieldArrow">▶</span>';
+
+			container.appendChild(header);
+
+			const content =
+			document.createElement("div");
+
+			content.className =
+				"playfieldSectionContent";
+
+			container.appendChild(content);
+
+
+			// TODO: sauvegarder par table ou remettre à zero quand on charge une nouvelle table
+			const storageKey =
+				"playfield_" + category;
+
+			const opened =
+				sessionStorage.getItem(storageKey) === "true";
+
+			content.style.display =
+				opened ? "block" : "none";
+
+			header.querySelector(".playfieldArrow").textContent =
+				opened ? "▼" : "▶";
+
+			// UNE SEULE FOIS
+			header.addEventListener("click", () =>
+			{
+				const opened =
+					content.style.display !== "none";
+
+				content.style.display =
+					opened ? "none" : "block";
+
+				header.querySelector(".playfieldArrow").textContent =
+					opened ? "▶" : "▼";
+
+				sessionStorage.setItem(
+					storageKey,
+					(!opened).toString()
+				);
+			});
+
+			items.forEach(item =>
+			{
+				const div =
+					document.createElement("div");
+
+				div.className =
+					"playfieldItem";
+
+				const hasDescription =
+					item.description &&
+					item.description.length > 0;
+
+				const hasLabel =
+					item.label && item.label.trim() !== "";
+
+				const displayLabel =
+					hasLabel
+						? item.label
+						: item.officialName;
+
+				div.innerHTML =
+
+					'<div class="playfieldHeader">' +
+
+						'<div style="display:flex;flex-direction:column;flex:1;">' +
+
+							'<div style="display:flex;align-items:center;justify-content:space-between;">' +
+
+								'<span class="playfieldLabel">' +
+									EscapeHtml(displayLabel) +
+								'</span>' +
+
+								'<span style="display:flex;align-items:center;gap:10px;">' +
+
+									'<span class="playfieldType">' +
+										EscapeHtml(item.type) +
+									'</span>' +
+
+									(hasDescription
+										? '<span class="playfieldExpand">+</span>'
+										: '') +
+
+								'</span>' +
+
+							'</div>' +
+
+							(
+								hasLabel && item.officialName
+									? '<span class="shootLocation">' +
+										'[' + EscapeHtml(item.officialName) + ']' +
+									  '</span>'
+									: ''
+							) +
+
+						'</div>' +
+
+					'</div>' +
+
+				(hasDescription ?
+
+				'<div class="playfieldDescription">' +
+					EscapeHtml(item.description) +
+				'</div>'
+
+				: '');
+
+				content.appendChild(div);
+
+				
+
+				const expand =
+					div.querySelector(".playfieldExpand");
+
+				const description =
+					div.querySelector(".playfieldDescription");
+
+				if(expand)
+				{
+					expand.addEventListener("click", e =>
+					{
+						e.stopPropagation();
+
+						const opened =
+							description.style.display === "block";
+
+						description.style.display =
+							opened ? "none" : "block";
+
+						expand.textContent =
+							opened ? "+" : "-";
+					});
+				}
+
+				div.addEventListener(
+					"mouseenter",
+					() =>
+					{
+						ShowStepMarkers({
+							type:"action",
+							spots:[
+								{
+									id:"",
+									shoot:item.id
+								}
+							]
+						});
+					});
+
+				div.addEventListener(
+					"mouseleave",
+					HideStepMarkers);
+			});
+		}
+
+		function BuildStepsList(steps, parent)
+		{
+		if (!steps)
+		return;
+
+		steps.forEach(step =>
+		{
+		const div =
+		document.createElement('div');
+
+		div.className =
+		step.type === 'info'
+		? 'stepItemInfo'
+		: 'stepItem';
+
+		let html = '';
+
+		// Nouveau format
+		if (step.goal || (step.spots && step.spots.length > 0))
+		{
+		if (step.goal)
+		{
+		html +=
+		'<div class="stepGoal">' +
+							(step.number
+								?  EscapeHtml(step.number) + '. '
+								: '') +
+							EscapeHtml(step.goal).replace(/\|\|/g,
+								"<br>")  +
+							'</div>';
+			}
+
+			if (step.spots && step.spots.length > 0)
+			{
+			html += '<div class="stepShoots">' + BuildShootsHtml(step.spots) + '</div>';
+			}
+			}
+			// Ancien format
+			else if (step.label)
+			{
+			html =
+			step.number
+			? '<b>' + EscapeHtml(step.number) + '.</b> ' + EscapeHtml(step.label)
+			: EscapeHtml(step.label);
+			}
+
+			div.innerHTML = html;
+
+			parent.appendChild(div);
+
+			div.addEventListener(
+			'mouseenter',
+			() => ShowStepMarkers(step)
+			);
+
+			div.addEventListener(
+			'mouseleave',
+			HideStepMarkers
+			);
+			});
+			}
+
+			function BuildFocusSections(node)
+			{
+			const container =
+			document.getElementById("focusSectionsContainer");
+
+			container.innerHTML = "";
+
+			const sections =
+			node.data("focusSections");
+
+			if(!sections || sections.length===0)
+			{
+			return;
+			}
+
+			sections.forEach((section,index)=>
+			{
+			const block =
+			document.createElement("div");
+
+			block.className =
+			"focusSection";
+
+			const header =
+			document.createElement("div");
+
+			header.className =
+			"focusHeader";
+
+			header.innerText =
+			section.title;
+
+			const content =
+			document.createElement("div");
+
+			content.className =
+			"focusContent";
+
+			content.innerText =
+			section.description;
+
+			if(index===0)
+			content.classList.add("open");
+
+			if(index===0)
+			ShowFocus(section.focus);
+
+			header.onclick = () =>
+			{
+			container
+			.querySelectorAll(".focusContent")
+			.forEach(x => x.classList.remove("open"));
+
+			content.classList.add("open");
+
+			ShowFocus(section.focus);
+			};
+
+			block.appendChild(header);
+			block.appendChild(content);
+
+			container.appendChild(block);
+			});
+			}
+
+			cy.on('tap', 'node', function (evt) {
+
+			const node = evt.target;
+
+			document.getElementById('info').scrollTop = 0;
+			currentNode = node;
+
+			HideFocus();
+
+			if (node.data('clickable') === false)
+			{
+			return;
+			}
+
+			if (node.data('type') === 'group')
+			{
+			return;
+			}
+
+
+
+
+			document.getElementById('title').innerText =
+			node.data('label');
+
+			const descriptionSection =
+			document.getElementById('descriptionSection');
+
+			const rewardSection =
+			document.getElementById('rewardSection');
+
+			const sourcesSection =
+			document.getElementById('sourcesSection');
+
+
+			const auteurSection =
+			document.getElementById('auteurSection');
+
+			const contributeursSection  =
+			document.getElementById('contributeursSection');
+
+			const stepsContainerInfo =
+			document.getElementById('stepsContainerInfo');
+
+			const notesSection =
+			document.getElementById('notesSection');
+
+			const playfieldSection =
+			document.getElementById('playfieldSection');
+
+			const notesContainer =
+			document.getElementById('notesContainer');
+
+			const advancedButton =
+			document.getElementById('advancedButton');
+
+			const advancedNotesSection =
+			document.getElementById('advancedNotesSection');
+
+			const advancedNotesContainer =
+			document.getElementById('advancedNotesContainer');
+
+			stepsContainerInfo.innerHTML = '';
+
+			BuildFocusSections(node);
+
+			if (node.data('description'))
+			{
+			descriptionSection.style.display = 'block';
+
+			document.getElementById('description').innerText =
+			node.data('description');
+			}
+			else
+			{
+			descriptionSection.style.display = 'none';
+			}
+
+			if (node.data('reward'))
+			{
+			rewardSection.style.display = 'block';
+
+			document.getElementById('reward').innerText =
+			node.data('reward');
+			}
+			else
+			{
+			rewardSection.style.display = 'none';
+			}
+
+			const stepSections =
+			node.data('stepSections');
+
+			if (stepSections &&
+			stepSections.length > 0)
+		{
+			stepSections.forEach(section =>
+			{
+				if (!section.steps ||
+					section.steps.length === 0)
+				{
+					return;
+				}
+
+				const title =
+					document.createElement('h4');
+
+				title.innerText =
+					section.title;
+
+				stepsContainerInfo.appendChild(title);
+
+				BuildStepsList(
+					section.steps,
+					stepsContainerInfo
+				);
+			});
+		}
+		else
+		{
+			 const steps =
+				node.data('steps');
+
+			if (steps && steps.length > 0)
+		{
+		const title =
+		document.createElement('h4');
+
+		title.innerText = 'Etapes';
+
+		stepsContainerInfo.appendChild(title);
+
+		BuildStepsList(
+		steps,
+		stepsContainerInfo
+		);
+		}
+		}
+
+	
+
+		if (node.data('auteur') &&
+			node.data('auteur').length > 0)
+		{
+			auteurSection.style.display = 'block';
+
+			FillBulletList(
+				'auteur',
+				node.data('auteur')
+			);
+		}
+		else
+		{
+			auteurSection.style.display = 'none';
+		}
+
+		if (node.data('contributeurs') &&
+			node.data('contributeurs').length > 0)
+		{
+			contributeursSection.style.display = 'block';
+
+			FillBulletList(
+				'contributeurs',
+				node.data('contributeurs')
+			);
+		}
+		else
+		{
+			contributeursSection.style.display = 'none';
+		}
+		
+		notesContainer.innerHTML = '';
+		
+		if (
+			node.data('advancedNotes') &&
+			node.data('advancedNotes').length > 0
+			)
+			{
+			advancedButton.style.display = 'block';
+			}
+			else
+			{
+			advancedButton.style.display = 'none';
+			}
+
+			console.log(
+			"SELECTED NODE DATA :",
+			node.data()
+			);
+			if (node.data('notes') && node.data('notes').length > 0)
+		{
+		notesSection.style.display = 'block';
+
+		BuildStepsList(
+		node.data('notes'),
+		notesContainer
+		);
+		}
+		else
+		{
+		notesSection.style.display = 'none';
+		}
+
+		advancedNotesContainer.innerHTML = '';
+
+		if (showAdvanced &&
+		node.data('advancedNotes')?.length > 0)
+		{
+			advancedNotesSection.style.display = 'block';
+
+			BuildStepsList(
+				node.data('advancedNotes'),
+				advancedNotesContainer
+			);
+		}
+		else
+		{
+			advancedNotesSection.style.display = 'none';
+		}
+		
+		if(node.data('type')==="playfield")
+		{
+			playfieldSection.style.display="block";
+
+			BuildPlayfieldList(
+				"shot",
+				"playfieldShots");
+
+			BuildPlayfieldList(
+				"insert",
+				"playfieldInserts");
+
+			BuildPlayfieldList(
+				"zone",
+				"playfieldZones");
+		}
+		else
+		{
+			playfieldSection.style.display="none";
+		}
+
+		if (node.data('sources') &&
+			node.data('sources').length > 0)
+			{
+			sourcesSection.style.display = 'block';
+
+			FillBulletList(
+			'sources',
+			node.data('sources')
+			);
+			}
+			else
+			{
+			sourcesSection.style.display = 'none';
+			}
+
+
+
+
+
+			});
+
+
+			document
+			.getElementById('advancedButton')
+			.addEventListener('click', () =>
+			{
+			showAdvanced = !showAdvanced;
+
+			document.getElementById('advancedButton').innerText =
+			showAdvanced ? '-' : '+';
+
+			if (currentNode)
+			{
+			currentNode.emit('tap');
+			}
+			});
+
+			document.getElementById("openProjectButton")
+			.addEventListener("click", () =>
+			{
+			document
+			.getElementById("projectFileInput")
+			.click();
+			});
+
+			document
+			.getElementById("projectFileInput")
+			.addEventListener("change", async event =>
+			{
+				const file = event.target.files[0];
+
+				if (!file)
+					return;
+
+				console.log("ZIP sélectionné :", file.name);
+
+				try
+				{
+					const zip =
+						await JSZip.loadAsync(file);
+
+					console.log(
+						"Fichiers contenus :",
+						Object.keys(zip.files)
+					);
+
+					await LoadProjectZip(zip);
+				}
+				catch (error)
+				{
+					console.error(
+						"Impossible de charger le projet :",
+						error
+					);
+				}
+			});
+								
+			async function LoadProjectZip(zip)
+			{
+				// ----- PROJECT -----
+
+				const projectFile =
+					zip.file("Project.json");
+
+				if (!projectFile)
+				{
+					throw new Error(
+						"Project.json est introuvable dans l'archive."
+					);
+				}
+
+				let projectText =
+					await projectFile.async("text");
+
+				projectText =
+					projectText.replace(/^\uFEFF/, '');
+
+				const project =
+					JSON.parse(projectText);
+
+
+				// ----- SHOTS -----
+
+				const shotsFile =
+					zip.file("Shots.json");
+
+				if (!shotsFile)
+				{
+					throw new Error(
+						"Shots.json est introuvable dans l'archive."
+					);
+				}
+
+				let shotsText =
+					await shotsFile.async("text");
+
+				shotsText =
+					shotsText.replace(/^\uFEFF/, '');
+
+				const shots =
+					JSON.parse(shotsText);
+
+
+				// ----- PLAYFIELD -----
+
+				const playfieldFile =
+					zip.file("Playfield.png");
+
+				if (!playfieldFile)
+				{
+					throw new Error(
+						"Playfield.png est introuvable dans l'archive."
+					);
+				}
+
+				const playfieldBlob =
+					await playfieldFile.async("blob");
+
+				const playfieldUrl =
+					URL.createObjectURL(playfieldBlob);
+
+				document
+					.getElementById("playfieldImage")
+					.src = playfieldUrl;
+
+
+				// ----- LOAD -----
+
+				document
+					.getElementById("tableTitle")
+					.innerText = project.title;
+
+				LoadProject(project, shots);
+			}
+
+			async function LoadProjectFromUrl(url)
+			{
+				console.log("Chargement du guide depuis :", url);
+
+				const response =
+					await fetch(url);
+
+				if (!response.ok)
+				{
+					throw new Error(
+						"Impossible de télécharger le guide. HTTP " +
+						response.status
+					);
+				}
+
+				const blob =
+					await response.blob();
+
+				const zip =
+					await JSZip.loadAsync(blob);
+
+				console.log(
+					"Fichiers contenus :",
+					Object.keys(zip.files)
+				);
+
+				await LoadProjectZip(zip);
+			}
+
+			async function LoadGuideFromUrl()
+			{
+				const params =
+					new URLSearchParams(
+						window.location.search
+					);
+
+				const guideUrl =
+					params.get("guide");
+
+				if (!guideUrl)
+					return;
+
+				try
+				{
+					await LoadProjectFromUrl(guideUrl);
+				}
+				catch (error)
+				{
+					console.error(
+						"Impossible de charger le guide :",
+						error
+					);
+				}
+			}
+
+			async function LoadGuide()
+			{
+				const guideUrl =
+					"The%20Addams%20Family.zip";
+
+				try
+				{
+					await LoadProjectFromUrl(guideUrl);
+				}
+				catch (error)
+				{
+					console.error(
+						"Impossible de charger le guide :",
+						error
+					);
+				}
+			}
+
+
+			function LoadProject(project, shots)
+			{
+			shootsData = shots;
+
+			Object.entries(shootsData).forEach(([id,item]) =>
+			{
+			item.id = id;
+			});
+
+			const elements = [];
+
+			project.nodes.forEach(node => {
+
+
+
+			elements.push({
+
+			data: {
+			id: node.id,
+			label: node.label,
+			description: node.description,
+			reward: node.reward,
+			type: node.type,
+			color: node.color,
+
+			width: node.width,
+			height: node.height,
+
+			sources: node.sources || [],
+			auteur: node.auteur || [],
+			contributeurs: node.contributeurs || [],
+
+			steps: node.steps || [],
+
+			stepSections: node.stepSections || [],
+
+			notes: node.notes || [],
+			advancedNotes: node.advancedNotes || [],
+
+			focusSections: node.focusSections || []
+			},
+
+			position: {
+			x: node.x,
+			y: -node.y
+			}
+
+			});
+
+			});
+
+			project.edges.forEach(edge => {
+
+			elements.push({
+
+			data: {
+			source: edge.source,
+			target: edge.target
+			}
+
+			});
+			});
+
+			cy.elements().remove();
+
+			cy.add(elements);
+			cy.fit(50);
+			const introNode =
+			cy.getElementById('intro');
+
+			introNode.emit('tap');
+
+			window.addEventListener('resize', () =>
+			{
+			cy.resize();
+			});
+
+			}
+			LoadGuide();
+			//LoadGuideFromUrl();
+		</script>
+
+	</body>
+
 </html>

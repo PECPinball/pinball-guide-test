@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 
 <head>
@@ -299,10 +299,72 @@
 		}
 
 		#cy {
+			width: 35%;
 
-		width: 35%;
+			border-right: 1px solid #ccc;
 
-		border-right: 1px solid #ccc;
+			position: relative;
+		}
+		#mapControls
+		{
+			position: absolute;
+
+			top: 10px;
+			left: 10px;
+
+			display: flex;
+
+			gap: 5px;
+
+			z-index: 100;
+		}
+
+		#mapControls button
+		{
+			width: 36px;
+			height: 36px;
+
+			font-size: 20px;
+
+			border: 1px solid #ccc;
+
+			border-radius: 4px;
+
+			background: white;
+
+			cursor: pointer;
+		}
+
+		#mapControls button:hover
+		{
+			background: #eee;
+		}
+		#fitMapButton
+		{
+			position: absolute;
+
+			top: 10px;
+			right: 10px;
+
+			width: 36px;
+			height: 36px;
+
+			z-index: 100;
+
+			font-size: 20px;
+
+			border: 1px solid #ccc;
+
+			border-radius: 4px;
+
+			background: white;
+
+			cursor: pointer;
+		}
+
+		#fitMapButton:hover
+		{
+			background: #eee;
 		}
 
 		#info {
@@ -504,7 +566,22 @@
 
     <div id="container">
 
-        <div id="cy"></div>
+        <div id="cy">
+			<div id="mapControls">
+
+				<button id="zoomOutButton" title="Zoom arrière">
+					−
+				</button>
+
+				<button id="zoomInButton" title="Zoom avant">
+					+
+				</button>
+			</div>
+
+			<button id="fitMapButton" title="Afficher toute la carte">
+				⛶
+			</button>
+		</div>
 
         <div id="info">
 
@@ -874,8 +951,8 @@
 		return;
 
 		ele.style({
-		"border-width": 3,
-		"border-color":"#ff9800",
+		"border-width": 6,
+		"border-color":"#ffee00",
 		//"background-opacity":0.12,
 		//"background-color":"#ffd54f"
 		});
@@ -1265,6 +1342,27 @@
 			});
 			}
 
+			document
+			.getElementById('fitMapButton')
+			.addEventListener('click', () =>
+			{
+				cy.fit(50);
+			});
+
+			document
+			.getElementById('zoomInButton')
+			.addEventListener('click', () =>
+			{
+				cy.zoom(cy.zoom() * 1.2);
+			});
+
+			document
+			.getElementById('zoomOutButton')
+			.addEventListener('click', () =>
+			{
+				cy.zoom(cy.zoom() / 1.2);
+			});
+
 			cy.on('tap', 'node', function (evt) {
 
 			const node = evt.target;
@@ -1543,8 +1641,46 @@
 			}
 			});
 
-		
-								
+			/*document.getElementById("openProjectButton")
+			.addEventListener("click", () =>
+			{
+			document
+			.getElementById("projectFileInput")
+			.click();
+			});
+
+			document
+			.getElementById("projectFileInput")
+			.addEventListener("change", async event =>
+			{
+				const file = event.target.files[0];
+
+				if (!file)
+					return;
+
+				console.log("ZIP sélectionné :", file.name);
+
+				try
+				{
+					const zip =
+						await JSZip.loadAsync(file);
+
+					console.log(
+						"Fichiers contenus :",
+						Object.keys(zip.files)
+					);
+
+					await LoadProjectZip(zip);
+				}
+				catch (error)
+				{
+					console.error(
+						"Impossible de charger le projet :",
+						error
+					);
+				}
+			});
+			*/					
 			async function LoadProjectZip(zip)
 			{
 				// ----- PROJECT -----
@@ -1764,10 +1900,17 @@
 
 			cy.add(elements);
 			cy.fit(50);
-			const introNode =
-			cy.getElementById('intro');
+			
+			if (project.startNode)
+			{
+				const startNode =
+					cy.getElementById(project.startNode);
 
-			introNode.emit('tap');
+				if (startNode.length > 0)
+				{
+					startNode.emit('tap');
+				}
+			}
 
 			window.addEventListener('resize', () =>
 			{

@@ -305,6 +305,47 @@
 
 			position: relative;
 		}
+		.guideBadge
+		{
+			position: absolute;
+
+			width: 36px;
+			height: 36px;
+
+			display: none;
+
+			align-items: center;
+			justify-content: center;
+
+			background: #ffff00;
+
+			color: #000000;
+
+			font-size: 22px;
+			font-weight: bold;
+
+			border: 3px solid #000000;
+			border-radius: 50%;
+
+			z-index: 200;
+		}
+		#guideBadge1
+		{
+			top: 10px;
+			left: 50%;
+			transform: translateX(-50%);
+		}
+		#guideBadge2
+		{
+			top: 10px;
+			right: 10px;
+		}
+		#guideBadge3
+		{
+			top: 10px;
+			left: 50%;
+			transform: translateX(-50%);
+		}
 		#mapControls
 		{
 			position: absolute;
@@ -373,6 +414,7 @@
 		box-sizing: border-box;
 		background: #f5f5f5;
 		overflow-y: auto;
+		position: relative;
 		}
 
 		#title {
@@ -525,6 +567,7 @@
 
 		font-size: 10px;
 		}
+		
 
 		}
 	</style>
@@ -567,6 +610,7 @@
     <div id="container">
 
         <div id="cy">
+		<div id="guideBadge1" class="guideBadge">1</div>
 			<div id="mapControls">
 
 				<button id="zoomOutButton" title="Zoom arrière">
@@ -584,9 +628,9 @@
 		</div>
 
         <div id="info">
-
+		 <div id="guideBadge2" class="guideBadge">2</div>
 			<div id="titleContainer">
-
+			
 				<div id="title">
 					Select a node
 				</div>
@@ -598,7 +642,9 @@
 			</div>
 
            <div id="descriptionSection">
+		  
 				   <div id="description"></div>
+				   
 			</div>
 
 			<div id="focusSectionsContainer"></div>
@@ -651,7 +697,7 @@
         </div>
 
        <div id="playfield">
-
+	   <div id="guideBadge3" class="guideBadge">3</div>
             <img id="playfieldImage"
                  src="playfield.png"
                  alt="Playfield">
@@ -674,7 +720,7 @@
 		let showAdvanced = false;
 
 		let currentNode = null;
-
+		let startNodeId;
 
 		cy = cytoscape({
 
@@ -1319,20 +1365,41 @@
 			section.description;
 
 			if(index===0)
-			content.classList.add("open");
+			{
+				content.classList.add("open");
 
-			if(index===0)
-			ShowFocus(section.focus);
+				if(node.id() === startNodeId)
+				{
+					document.getElementById('guideBadge1').style.display = 'flex';
+					document.getElementById('guideBadge2').style.display = 'flex';
+					document.getElementById('guideBadge3').style.display = 'flex';
+				}
+
+				ShowFocus(section.focus);
+			}
 
 			header.onclick = () =>
 			{
-			container
-			.querySelectorAll(".focusContent")
-			.forEach(x => x.classList.remove("open"));
+				container
+					.querySelectorAll(".focusContent")
+					.forEach(x => x.classList.remove("open"));
 
-			content.classList.add("open");
+				content.classList.add("open");
 
-			ShowFocus(section.focus);
+				if(index === 0 && node.id() === startNodeId)
+				{
+					document.getElementById('guideBadge1').style.display = 'flex';
+					document.getElementById('guideBadge2').style.display = 'flex';
+					document.getElementById('guideBadge3').style.display = 'flex';
+				}
+				else
+				{
+					document.getElementById('guideBadge1').style.display = 'none';
+					document.getElementById('guideBadge2').style.display = 'none';
+					document.getElementById('guideBadge3').style.display = 'none';
+				}
+
+				ShowFocus(section.focus);
 			};
 
 			block.appendChild(header);
@@ -1366,6 +1433,19 @@
 			cy.on('tap', 'node', function (evt) {
 
 			const node = evt.target;
+
+			if (startNodeId === node.id())
+			{
+				document.getElementById('guideBadge1').style.display = 'flex';
+				document.getElementById('guideBadge2').style.display = 'flex';
+				document.getElementById('guideBadge3').style.display = 'flex';
+			}
+			else
+			{
+				document.getElementById('guideBadge1').style.display = 'none';
+				document.getElementById('guideBadge2').style.display = 'none';
+				document.getElementById('guideBadge3').style.display = 'none';
+			}
 
 			document.getElementById('info').scrollTop = 0;
 			currentNode = node;
@@ -1902,12 +1982,18 @@
 			cy.fit(50);
 			
 			if (project.startNode)
-			{
+{
+				startNodeId = project.startNode;
+
 				const startNode =
 					cy.getElementById(project.startNode);
 
 				if (startNode.length > 0)
 				{
+					document.getElementById('guideBadge1').style.display = 'flex';
+					document.getElementById('guideBadge2').style.display = 'flex';
+					document.getElementById('guideBadge3').style.display = 'flex';
+
 					startNode.emit('tap');
 				}
 			}

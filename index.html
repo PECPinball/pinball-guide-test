@@ -1415,22 +1415,31 @@
 
 			document
 			.getElementById('fitMapButton')
-			.addEventListener('click', () =>
+			.addEventListener('pointerdown', (event) =>
 			{
+				event.preventDefault();
+				event.stopPropagation();
+
 				cy.fit(50);
 			});
 
 			document
 			.getElementById('zoomInButton')
-			.addEventListener('click', () =>
+			.addEventListener('pointerdown', (event) =>
 			{
+				event.preventDefault();
+				event.stopPropagation();
+
 				cy.zoom(cy.zoom() * 1.2);
 			});
 
 			document
 			.getElementById('zoomOutButton')
-			.addEventListener('click', () =>
+			.addEventListener('pointerdown', (event) =>
 			{
+				event.preventDefault();
+				event.stopPropagation();
+
 				cy.zoom(cy.zoom() / 1.2);
 			});
 

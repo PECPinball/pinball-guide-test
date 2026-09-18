@@ -1,0 +1,20 @@
+﻿{
+    "tables": [
+        {
+            "title": "The Addams Family",
+             "manufacturer": "Bally",
+            "year": "1992",
+             "color": "#7c3aed",
+            "guide": "The%20Addams%20Family.zip",
+            "state":"Disponible"
+        },
+        {
+            "title": "Jurassic Park",
+              "manufacturer": "Data East",
+            "year": "1993",
+             "color": "#7c3aed",
+            "guide": "JurassicPark_DataEast.zip",
+            "state":"Disponible"
+        }
+    ]
+}

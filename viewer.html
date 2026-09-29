@@ -642,9 +642,7 @@
 		 <div id="guideBadge2" class="guideBadge">2</div>
 			<div id="titleContainer">
 			
-				<div id="title">
-					Select a node
-				</div>
+				<div id="title">Select a node</div>
 
 				<button id="advancedButton">
 					+
@@ -1543,14 +1541,17 @@
 
 			if (node.data('reward'))
 			{
-			rewardSection.style.display = 'block';
+				rewardSection.style.display = 'block';
 
-			document.getElementById('reward').innerText =
-			node.data('reward');
+				rewardSection.querySelector('h4').innerText =
+					node.data('titleReward') || 'Récompense';
+
+				document.getElementById('reward').innerText =
+					node.data('reward');
 			}
 			else
 			{
-			rewardSection.style.display = 'none';
+				rewardSection.style.display = 'none';
 			}
 
 			const stepSections =
@@ -1609,6 +1610,9 @@
 		{
 			auteurSection.style.display = 'block';
 
+			auteurSection.querySelector('h4').innerText =
+				node.data('titleAuteur') || 'Fiche créée par';
+
 			FillBulletList(
 				'auteur',
 				node.data('auteur')
@@ -1623,6 +1627,9 @@
 			node.data('contributeurs').length > 0)
 		{
 			contributeursSection.style.display = 'block';
+
+			contributeursSection.querySelector('h4').innerText =
+				node.data('titleContributor') || 'Contributeur';
 
 			FillBulletList(
 				'contributeurs',
@@ -1640,38 +1647,45 @@
 			node.data('advancedNotes') &&
 			node.data('advancedNotes').length > 0
 			)
-			{
-			advancedButton.style.display = 'block';
-			}
-			else
-			{
-			advancedButton.style.display = 'none';
-			}
-
-			console.log(
-			"SELECTED NODE DATA :",
-			node.data()
-			);
-			if (node.data('notes') && node.data('notes').length > 0)
 		{
-		notesSection.style.display = 'block';
-
-		BuildStepsList(
-		node.data('notes'),
-		notesContainer
-		);
+			advancedButton.style.display = 'block';
 		}
 		else
 		{
-		notesSection.style.display = 'none';
+			advancedButton.style.display = 'none';
+		}
+
+		console.log(
+		"SELECTED NODE DATA :",
+		node.data()
+		);
+			
+		if (node.data('notes') && node.data('notes').length > 0)
+		{
+			notesSection.style.display = 'block';
+
+			notesSection.querySelector('h4').innerText =
+				node.data('titleNote') || 'Note';
+
+			BuildStepsList(
+				node.data('notes'),
+				notesContainer
+			);
+		}
+		else
+		{
+			notesSection.style.display = 'none';
 		}
 
 		advancedNotesContainer.innerHTML = '';
 
 		if (showAdvanced &&
-		node.data('advancedNotes')?.length > 0)
+			node.data('advancedNotes')?.length > 0)
 		{
 			advancedNotesSection.style.display = 'block';
+
+			advancedNotesSection.querySelector('h4').innerText =
+				node.data('titleAdvancedNote') || 'Note+';
 
 			BuildStepsList(
 				node.data('advancedNotes'),
@@ -1706,24 +1720,23 @@
 
 		if (node.data('sources') &&
 			node.data('sources').length > 0)
-			{
+		{
 			sourcesSection.style.display = 'block';
 
+			sourcesSection.querySelector('h4').innerText =
+				node.data('titleSource') || 'Source';
+
 			FillBulletList(
-			'sources',
-			node.data('sources')
+				'sources',
+				node.data('sources')
 			);
-			}
-			else
-			{
+		}
+		else
+		{
 			sourcesSection.style.display = 'none';
-			}
+		}	
 
-
-
-
-
-			});
+		});
 
 
 			document
@@ -1961,6 +1974,14 @@
 			label: node.label,
 			description: node.description,
 			reward: node.reward,
+
+			titleReward: node.titleReward,
+			titleAuteur: node.titleAuteur,
+			titleContributor: node.titleContributor,
+			titleSource: node.titleSource,
+			titleNote: node.titleNote,
+			titleAdvancedNote: node.titleAdvancedNote,
+
 			type: node.type,
 			color: node.color,
 
